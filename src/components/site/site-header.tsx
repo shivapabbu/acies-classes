@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, PhoneCall } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -10,6 +13,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { LogoMark } from "@/components/site/logo-mark";
+import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -22,7 +26,14 @@ const navItems = [
 const primaryPhone = "+918082183378";
 const secondaryPhone = "+917738588278";
 
+function isNavActive(pathname: string, href: string) {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export function SiteHeader() {
+  const pathname = usePathname();
+
   return (
     <header className="sticky top-0 z-50 w-full">
       {/* Top contact strip (dense, reference-like) */}
@@ -54,16 +65,25 @@ export function SiteHeader() {
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-6 md:flex">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-sm font-medium text-foreground/80 transition hover:text-foreground"
-              >
-                {item.label}
-              </Link>
-            ))}
+          <nav className="hidden items-center gap-1 md:flex">
+            {navItems.map((item) => {
+              const active = isNavActive(pathname, item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    active
+                      ? "bg-primary/10 font-semibold text-primary"
+                      : "text-foreground/80 hover:bg-muted/80 hover:text-foreground"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="hidden items-center gap-2 md:flex">
@@ -94,17 +114,25 @@ export function SiteHeader() {
                 <SheetHeader>
                   <SheetTitle>ACIES Classes</SheetTitle>
                 </SheetHeader>
-                <div className="mt-6 flex flex-col gap-2">
-                  {navItems.map((item) => (
-                    <Button
-                      key={item.href}
-                      asChild
-                      variant="ghost"
-                      className="justify-start"
-                    >
-                      <Link href={item.href}>{item.label}</Link>
-                    </Button>
-                  ))}
+                <div className="mt-6 flex flex-col gap-1">
+                  {navItems.map((item) => {
+                    const active = isNavActive(pathname, item.href);
+                    return (
+                      <Button
+                        key={item.href}
+                        asChild
+                        variant={active ? "secondary" : "ghost"}
+                        className={cn(
+                          "justify-start",
+                          active && "bg-primary/10 font-semibold text-primary hover:bg-primary/15"
+                        )}
+                      >
+                        <Link href={item.href} aria-current={active ? "page" : undefined}>
+                          {item.label}
+                        </Link>
+                      </Button>
+                    );
+                  })}
                 </div>
                 <div className="mt-6 grid gap-2">
                   <Button
